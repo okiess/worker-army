@@ -17,11 +17,16 @@ Jeweler::Tasks.new do |gem|
   gem.name = "worker-army"
   gem.homepage = "http://github.com/okiess/worker-army"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Simple worker queue}
+  gem.description = %Q{Simple redis base worker queue with a HTTP/Rest interface}
   gem.email = "kiessler@inceedo.com"
   gem.authors = ["Oliver Kiessler"]
-  # dependencies defined in Gemfile
+  gem.add_runtime_dependency 'sinatra'
+  gem.add_runtime_dependency 'sinatra-contrib'
+  gem.add_runtime_dependency 'rest_client'
+  gem.add_runtime_dependency 'redis'
+  gem.add_runtime_dependency 'json'
+  gem.add_runtime_dependency 'multi_json'
 end
 Jeweler::RubygemsDotOrgTasks.new
 
@@ -32,20 +37,11 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
-require 'rcov/rcovtask'
-Rcov::RcovTask.new do |test|
-  test.libs << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
-  test.rcov_opts << '--exclude "gems/*"'
-end
-
 task :default => :test
 
 require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "worker-army #{version}"
   rdoc.rdoc_files.include('README*')
