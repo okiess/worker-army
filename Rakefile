@@ -23,7 +23,7 @@ Jeweler::Tasks.new do |gem|
   gem.authors = ["Oliver Kiessler"]
   gem.add_runtime_dependency 'sinatra'
   gem.add_runtime_dependency 'sinatra-contrib'
-  gem.add_runtime_dependency 'rest_client'
+  gem.add_runtime_dependency 'rest-client'
   gem.add_runtime_dependency 'redis'
   gem.add_runtime_dependency 'json'
   gem.add_runtime_dependency 'multi_json'
