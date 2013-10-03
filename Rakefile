@@ -27,6 +27,7 @@ Jeweler::Tasks.new do |gem|
   gem.add_runtime_dependency 'redis'
   gem.add_runtime_dependency 'json'
   gem.add_runtime_dependency 'multi_json'
+  gem.add_runtime_dependency 'rake'
 end
 Jeweler::RubygemsDotOrgTasks.new
 
@@ -46,4 +47,20 @@ Rake::RDocTask.new do |rdoc|
   rdoc.title = "worker-army #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+require File.dirname(__FILE__) + '/lib/worker-army'
+task 'start_example_worker' do
+  worker = WorkerArmy::Worker.new
+  worker.job = ExampleJob.new
+  worker.process_queue
+end
+
+task :start_worker, :job_class do |t, args|
+  if args[:job_class]
+    worker = WorkerArmy::Worker.new
+    clazz = Object.const_get(args[:job_class].to_s)
+    worker.job = clazz.new
+    worker.process_queue
+  end
 end

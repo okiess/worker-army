@@ -23,3 +23,9 @@ post '/callback' do
   queue.save_result(data) if data
   json data
 end
+
+post '/generic_callback' do
+  data = JSON.parse(request.body.read)
+  status = { :status => 'ok' }
+  json status
+end
