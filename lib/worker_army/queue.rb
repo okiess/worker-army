@@ -2,6 +2,7 @@ require "redis"
 require "rest-client"
 require "json"
 require "multi_json"
+require "yaml"
 
 module WorkerArmy
   class Queue
