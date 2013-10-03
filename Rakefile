@@ -18,7 +18,7 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/okiess/worker-army"
   gem.license = "MIT"
   gem.summary = %Q{Simple worker queue}
-  gem.description = %Q{Simple redis base worker queue with a HTTP/Rest interface}
+  gem.description = %Q{Simple redis based worker queue with a HTTP/Rest interface}
   gem.email = "kiessler@inceedo.com"
   gem.authors = ["Oliver Kiessler"]
   gem.add_runtime_dependency 'sinatra'
