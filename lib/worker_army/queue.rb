@@ -10,7 +10,7 @@ module WorkerArmy
   
     def initialize
       if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
-        @config = { redis_host: ENV['worker_army_redis_host'], redis_port: ENV['worker_army_redis_port'] }
+        @config = { 'redis_host' => ENV['worker_army_redis_host'], 'redis_port' => ENV['worker_army_redis_port'] }
       else
         begin
           puts "Using config in your home directory"
