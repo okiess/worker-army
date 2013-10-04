@@ -9,11 +9,15 @@ module WorkerArmy
     attr_accessor :redis, :config
   
     def initialize
-      begin
-        puts "Using config in your home directory"
-        @config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
-      rescue Errno::ENOENT
-        raise "worker_army.yml expected in ~/.worker_army.yml"
+      if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
+        @config = { redis_host: ENV['worker_army_redis_host'], redis_port: ENV['worker_army_redis_port'] }
+      else
+        begin
+          puts "Using config in your home directory"
+          @config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
+        rescue Errno::ENOENT
+          raise "worker_army.yml expected in ~/.worker_army.yml"
+        end
       end
       puts "Config: #{@config}"
       @redis = Redis.new(host: @config['redis_host'], port: @config['redis_port'])

@@ -8,11 +8,16 @@ module WorkerArmy
       raise "No data" unless data
       raise "No job class provided" unless job_class
       
-      begin
-        # puts "Using config in your home directory"
-        @config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
-      rescue Errno::ENOENT
-        raise "worker_army.yml expected in ~/.worker_army.yml"
+      if ENV['worker_army_endpoint']
+        puts "Using environment variables for config..."
+        @config = { endpoint: ENV['worker_army_endpoint'] }
+      else
+        begin
+          puts "Using config in your home directory"
+          @config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
+        rescue Errno::ENOENT
+          raise "worker_army.yml expected in ~/.worker_army.yml"
+        end
       end
 
       worker_army_base_url = @config['endpoint']
