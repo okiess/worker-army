@@ -3,5 +3,5 @@ timeout 30
 preload_app true
 
 after_fork do |server, worker|
-  Redis.current.client.reconnect
+  Redis.current.quit
 end
