@@ -7,6 +7,7 @@ gem "sinatra"
 gem "sinatra-contrib"
 gem "rest-client"
 gem "rake"
+gem 'unicorn'
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
