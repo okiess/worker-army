@@ -9,24 +9,25 @@ module WorkerArmy
     attr_accessor :config
   
     def initialize
-      if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
-        @config = { 'redis_host' => ENV['worker_army_redis_host'], 'redis_port' => ENV['worker_army_redis_port'] }
-        if ENV['worker_army_redis_auth']
-          @config['redis_auth'] = ENV['worker_army_redis_auth']
-        end
-      else
-        @config = Queue.config
-      end
+
+      @config = Queue.config
       puts "Config: #{@config}"
       Queue.redis_instance
     end
     
     def self.config
-      begin
-        # puts "Using config in your home directory"
-        config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
-      rescue Errno::ENOENT
-        raise "worker_army.yml expected in ~/.worker_army.yml"
+      if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
+        config = { 'redis_host' => ENV['worker_army_redis_host'], 'redis_port' => ENV['worker_army_redis_port'] }
+        if ENV['worker_army_redis_auth']
+          config['redis_auth'] = ENV['worker_army_redis_auth']
+        end
+      else
+        begin
+          # puts "Using config in your home directory"
+          config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
+        rescue Errno::ENOENT
+          raise "worker_army.yml expected in ~/.worker_army.yml"
+        end
       end
       config
     end
