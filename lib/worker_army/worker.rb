@@ -1,14 +1,17 @@
 require "rest-client"
 require "json"
 require "multi_json"
+require 'socket'
 
 module WorkerArmy
   class Worker
-    attr_accessor :queue, :job
-    def initialize
+    attr_accessor :queue, :job, :worker_name
+    def initialize(worker_name = nil)
       @queue = WorkerArmy::Queue.new
+      @worker_name = worker_name
+      @host_name = Socket.gethostname
     end
-    
+
     def process_queue
       list, element = @queue.pop
       if list and element
@@ -21,7 +24,11 @@ module WorkerArmy
           callback_url = data['callback_url']
           if @job and @job.class.name == data['job_class']
             response_data = @job.perform(data)
-            response_data.merge!(job_count: job_count, callback_url: callback_url)
+            response_data.merge!(job_count: job_count, callback_url: callback_url,
+              finished_at: Time.now.utc.to_i, host_name: @host_name)
+            if @worker_name
+              response_data.merge!(worker_name: @worker_name)
+            end
           end
         rescue => e
           puts e
