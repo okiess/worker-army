@@ -36,8 +36,8 @@ module WorkerArmy
       unless $redis
         config = Queue.config
         $redis = Redis.new(host: config['redis_host'], port: config['redis_port'])
-        $redis.auth(config['redis_auth']) if config['redis_auth']
       end
+      $redis.auth(config['redis_auth']) if config['redis_auth']
       $redis
     end
 
@@ -49,6 +49,8 @@ module WorkerArmy
     def push(data, queue_name = "queue")
       if Queue.redis_instance and data
         job_count = Queue.redis_instance.incr("#{queue_name}_counter")
+        queue_name = data['queue_name'] if data['queue_name']
+        queue_name = "#{queue_name}_#{data['job_class']}"
         Queue.redis_instance.rpush queue_name, data.merge(job_count: job_count).to_json
       end
       raise "No data" unless data
