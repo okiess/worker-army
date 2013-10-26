@@ -23,8 +23,8 @@ module WorkerArmy
         end
       end
       # puts "Config: #{@config}"
-      $redis = Redis.new(host: @config['redis_host'], port: @config['redis_port'])
-      $redis.auth(@config['redis_auth']) if @config['redis_auth']
+      @redis = Redis.new(host: @config['redis_host'], port: @config['redis_port'])
+      @redis.auth(@config['redis_auth']) if @config['redis_auth']
     end
 
     def push(data, queue_name = "queue")
