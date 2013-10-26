@@ -48,7 +48,7 @@ module WorkerArmy
 
     def push(data, queue_name = "queue")
       if Queue.redis_instance and data
-        job_count = redis_instance.incr("#{queue_name}_counter")
+        job_count = Queue.redis_instance.incr("#{queue_name}_counter")
         Queue.redis_instance.rpush queue_name, data.merge(job_count: job_count).to_json
       end
       raise "No data" unless data
