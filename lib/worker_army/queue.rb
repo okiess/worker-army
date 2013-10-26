@@ -7,11 +7,10 @@ require "yaml"
 module WorkerArmy
   class Queue
     attr_accessor :config
-  
-    def initialize
 
+    def initialize
       @config = Queue.config
-      puts "Config: #{@config}"
+      # puts "Config: #{@config}"
       Queue.redis_instance
     end
     
@@ -33,11 +32,11 @@ module WorkerArmy
     end
 
     def self.redis_instance
+      $config = Queue.config unless $config
       unless $redis
-        config = Queue.config
-        $redis = Redis.new(host: config['redis_host'], port: config['redis_port'])
+        $redis = Redis.new(host: $config['redis_host'], port: $config['redis_port'])
       end
-      $redis.auth(config['redis_auth']) if config['redis_auth']
+      $redis.auth($config['redis_auth']) if $config['redis_auth']
       $redis
     end
 
