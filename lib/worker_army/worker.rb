@@ -13,7 +13,8 @@ module WorkerArmy
     end
 
     def process_queue
-      list, element = @queue.pop
+      raise "No job class set!" unless @job
+      list, element = @queue.pop(@job.class.name)
       if list and element
         puts "List: #{list} => #{element}"
         response_data = {}
