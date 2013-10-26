@@ -56,12 +56,12 @@ module WorkerArmy
       raise "No data" unless data
       raise "No redis connection!" unless Queue.redis_instance
     end
-    
-    def pop(queue_name = "queue")
+
+    def pop(job_class_name, queue_name = "queue")
       raise "No redis connection!" unless Queue.redis_instance
-      return Queue.redis_instance.blpop(queue_name)
+      return Queue.redis_instance.blpop("#{queue_name}_#{job_class_name}")
     end
-    
+
     def save_result(data)
       if data
         job_count = data['job_count']
