@@ -6,7 +6,7 @@ require "yaml"
 
 module WorkerArmy
   class Queue
-    attr_accessor :redis, :config
+    attr_accessor :config
   
     def initialize
       if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
@@ -15,37 +15,55 @@ module WorkerArmy
           @config['redis_auth'] = ENV['worker_army_redis_auth']
         end
       else
-        begin
-          # puts "Using config in your home directory"
-          @config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
-        rescue Errno::ENOENT
-          raise "worker_army.yml expected in ~/.worker_army.yml"
-        end
+        @config = Queue.config
       end
-      # puts "Config: #{@config}"
-      @redis = Redis.new(host: @config['redis_host'], port: @config['redis_port'])
-      @redis.auth(@config['redis_auth']) if @config['redis_auth']
+      puts "Config: #{@config}"
+      Queue.redis_instance
+    end
+    
+    def self.config
+      begin
+        # puts "Using config in your home directory"
+        config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
+      rescue Errno::ENOENT
+        raise "worker_army.yml expected in ~/.worker_army.yml"
+      end
+      config
+    end
+
+    def self.redis_instance
+      unless $redis
+        config = Queue.config
+        $redis = Redis.new(host: config['redis_host'], port: config['redis_port'])
+        $redis.auth(config['redis_auth']) if config['redis_auth']
+      end
+      $redis
+    end
+
+    def self.close_redis_connection
+      $redis.quit if $redis
+      $redis = nil
     end
 
     def push(data, queue_name = "queue")
-      if @redis and data
-        job_count = @redis.incr("#{queue_name}_counter")
-        @redis.rpush queue_name, data.merge(job_count: job_count).to_json
+      if Queue.redis_instance and data
+        job_count = redis_instance.incr("#{queue_name}_counter")
+        Queue.redis_instance.rpush queue_name, data.merge(job_count: job_count).to_json
       end
       raise "No data" unless data
-      raise "No redis connection!" unless @redis
+      raise "No redis connection!" unless Queue.redis_instance
     end
     
     def pop(queue_name = "queue")
-      raise "No redis connection!" unless @redis
-      return @redis.blpop(queue_name)
+      raise "No redis connection!" unless Queue.redis_instance
+      return Queue.redis_instance.blpop(queue_name)
     end
     
     def save_result(data)
       if data
         job_count = data['job_count']
         callback_url = data['callback_url']
-        @redis["job_#{job_count}"] = data
+        Queue.redis_instance["job_#{job_count}"] = data
         if callback_url
           data.delete("callback_url")
           begin
@@ -59,7 +77,7 @@ module WorkerArmy
     end
 
     def get_job_count(queue_name = "queue")
-      @redis["#{queue_name}_counter"]
+      Queue.redis_instance["#{queue_name}_counter"]
     end
   end
 end
