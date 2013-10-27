@@ -10,7 +10,7 @@ module WorkerArmy
       
       if ENV['worker_army_endpoint']
         puts "Using environment variables for config..."
-        @config = { 'endpoint' => ENV['worker_army_endpoint'] }
+        @config = { endpoint: ENV['worker_army_endpoint'] }
       else
         begin
           puts "Using config in your home directory"
@@ -23,11 +23,11 @@ module WorkerArmy
       worker_army_base_url = @config['endpoint']
       callback_url = "#{worker_army_base_url}/generic_callback" unless callback_url
       response = RestClient.post "#{worker_army_base_url}/jobs",
-        data.merge({
-          :job_class => job_class,
-          :callback_url => "#{worker_army_base_url}/callback?callback_url=#{callback_url}",
-          :queue_name => queue_name
-        }).to_json,
+        data.merge(
+          job_class: job_class,
+          callback_url: "#{worker_army_base_url}/callback?callback_url=#{callback_url}",
+          queue_name: queue_name
+        ).to_json,
         :content_type => :json, :accept => :json
       response.code == 200
     end

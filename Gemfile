@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
-ruby '1.8.7'
+ruby '1.9.3'
 
 gem "redis"
 gem "multi_json"
-gem "sinatra", "1.4.0"
+gem "sinatra"
 gem "sinatra-contrib"
 gem "rest-client"
 gem "rake"

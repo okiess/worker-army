@@ -25,10 +25,10 @@ module WorkerArmy
           callback_url = data['callback_url']
           if @job and @job.class.name == data['job_class']
             response_data = @job.perform(data)
-            response_data.merge!(:job_count => job_count, :callback_url => callback_url,
-              :finished_at => Time.now.utc.to_i, :host_name => @host_name)
+            response_data.merge!(job_count: job_count, callback_url: callback_url,
+              finished_at: Time.now.utc.to_i, host_name: @host_name)
             if @worker_name
-              response_data.merge!(:worker_name => @worker_name)
+              response_data.merge!(worker_name: @worker_name)
             end
           end
         rescue => e
