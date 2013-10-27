@@ -10,7 +10,7 @@ module WorkerArmy
       
       if ENV['worker_army_endpoint']
         puts "Using environment variables for config..."
-        @config = { endpoint: ENV['worker_army_endpoint'] }
+        @config = { 'endpoint' => ENV['worker_army_endpoint'] }
       else
         begin
           puts "Using config in your home directory"

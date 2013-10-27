@@ -49,3 +49,4 @@ pkg
 #*.rbc
 
 .rake_tasks~
+.rvmrc
