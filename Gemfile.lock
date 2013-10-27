@@ -2,16 +2,15 @@ GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.3.5)
-    backports (3.3.3)
+    backports (3.3.5)
     builder (3.2.2)
     dotenv (0.9.0)
-    eventmachine (1.0.3)
     faraday (0.8.8)
       multipart-post (~> 1.2.0)
     foreman (0.63.0)
       dotenv (>= 0.7)
       thor (>= 0.13.6)
-    git (1.2.5)
+    git (1.2.6)
     github_api (0.10.1)
       addressable
       faraday (~> 0.8.1)
@@ -20,9 +19,9 @@ GEM
       nokogiri (~> 1.5.2)
       oauth2
     hashie (2.0.5)
-    highline (1.6.19)
+    highline (1.6.20)
     httpauth (0.2.0)
-    jeweler (1.8.6)
+    jeweler (1.8.8)
       builder
       bundler (~> 1.0)
       git (>= 1.2.5)
@@ -31,12 +30,12 @@ GEM
       nokogiri (= 1.5.10)
       rake
       rdoc
-    json (1.8.0)
+    json (1.8.1)
     jwt (0.1.8)
       multi_json (>= 1.5)
-    kgio (2.8.0)
-    mime-types (1.23)
-    multi_json (1.7.8)
+    kgio (2.8.1)
+    mime-types (1.25)
+    multi_json (1.8.2)
     multi_xml (0.5.5)
     multipart-post (1.2.0)
     nokogiri (1.5.10)
@@ -48,27 +47,27 @@ GEM
       multi_xml (~> 0.5)
       rack (~> 1.2)
     rack (1.5.2)
-    rack-protection (1.5.0)
+    rack-protection (1.5.1)
       rack
     rack-test (0.6.2)
       rack (>= 1.0)
-    raindrops (0.11.0)
+    raindrops (0.12.0)
     rake (10.1.0)
     rdoc (4.0.1)
       json (~> 1.4)
-    redis (3.0.4)
+    redis (3.0.5)
     rest-client (1.6.7)
       mime-types (>= 1.16)
-    sinatra (1.4.3)
-      rack (~> 1.4)
+    sinatra (1.4.0)
+      rack (~> 1.5, >= 1.5.2)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
-    sinatra-contrib (1.4.0)
+    sinatra-contrib (1.4.1)
       backports (>= 2.0)
-      eventmachine
+      multi_json
       rack-protection
       rack-test
-      sinatra (~> 1.4.2)
+      sinatra (~> 1.4.0)
       tilt (~> 1.3)
     thor (0.18.1)
     tilt (1.4.1)
@@ -88,6 +87,6 @@ DEPENDENCIES
   rake
   redis
   rest-client
-  sinatra
+  sinatra (= 1.4.0)
   sinatra-contrib
   unicorn
