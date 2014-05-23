@@ -9,10 +9,10 @@ gem "rest-client"
 gem "rake"
 gem 'unicorn'
 gem "foreman"
+gem "jeweler", "~> 2.0.1"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do
   gem "bundler", "~> 1.6.2"
-  gem "jeweler", "~> 2.0.1"
 end
