@@ -78,6 +78,15 @@ module WorkerArmy
       end
     end
 
+    def ping(data)
+      Queue.redis_instance.lpush 'workers', data.to_json
+    end
+
+    def get_known_workers(recent_worker_pings = 1000)
+      worker_pings = Queue.redis_instance.lrange 'workers', 0, recent_worker_pings
+      worker_pings ? worker_pings.collect {|json| JSON.parse(json)} : []
+    end
+
     def get_job_count(queue_name = "queue")
       Queue.redis_instance["#{queue_name}_counter"]
     end

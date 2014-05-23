@@ -14,6 +14,9 @@ module WorkerArmy
 
     def process_queue
       raise "No job class set!" unless @job
+      @queue.ping(worker_pid: Process.pid, job_name: @job.class.name, host_name: @host_name,
+        timestamp: Time.now.utc.to_i)
+      puts "Worker ready!"
       list, element = @queue.pop(@job.class.name)
       if list and element
         puts "List: #{list} => #{element}"

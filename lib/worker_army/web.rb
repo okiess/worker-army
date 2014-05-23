@@ -8,7 +8,8 @@ queue = WorkerArmy::Queue.new
 
 get '/' do
   job_count = queue.get_job_count || 0
-  data = { :job_count => job_count }
+  workers = queue.get_known_workers
+  data = { job_count: job_count, workers: workers }
   json data
 end
 
