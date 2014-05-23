@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
     "test/helper.rb",
     "test/test_worker-army.rb",
     "unicorn.rb",
+    "worker-army.gemspec",
     "worker-army.yml.sample"
   ]
   s.homepage = "http://github.com/okiess/worker-army"
@@ -62,13 +63,6 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<foreman>, [">= 0"])
       s.add_runtime_dependency(%q<jeweler>, ["~> 2.0.1"])
       s.add_development_dependency(%q<bundler>, ["~> 1.6.2"])
-      s.add_runtime_dependency(%q<sinatra>, [">= 0"])
-      s.add_runtime_dependency(%q<sinatra-contrib>, [">= 0"])
-      s.add_runtime_dependency(%q<rest-client>, [">= 0"])
-      s.add_runtime_dependency(%q<redis>, [">= 0"])
-      s.add_runtime_dependency(%q<json>, [">= 0"])
-      s.add_runtime_dependency(%q<multi_json>, [">= 0"])
-      s.add_runtime_dependency(%q<rake>, [">= 0"])
     else
       s.add_dependency(%q<redis>, [">= 0"])
       s.add_dependency(%q<multi_json>, [">= 0"])
@@ -80,13 +74,6 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<foreman>, [">= 0"])
       s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
       s.add_dependency(%q<bundler>, ["~> 1.6.2"])
-      s.add_dependency(%q<sinatra>, [">= 0"])
-      s.add_dependency(%q<sinatra-contrib>, [">= 0"])
-      s.add_dependency(%q<rest-client>, [">= 0"])
-      s.add_dependency(%q<redis>, [">= 0"])
-      s.add_dependency(%q<json>, [">= 0"])
-      s.add_dependency(%q<multi_json>, [">= 0"])
-      s.add_dependency(%q<rake>, [">= 0"])
     end
   else
     s.add_dependency(%q<redis>, [">= 0"])
@@ -99,13 +86,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<foreman>, [">= 0"])
     s.add_dependency(%q<jeweler>, ["~> 2.0.1"])
     s.add_dependency(%q<bundler>, ["~> 1.6.2"])
-    s.add_dependency(%q<sinatra>, [">= 0"])
-    s.add_dependency(%q<sinatra-contrib>, [">= 0"])
-    s.add_dependency(%q<rest-client>, [">= 0"])
-    s.add_dependency(%q<redis>, [">= 0"])
-    s.add_dependency(%q<json>, [">= 0"])
-    s.add_dependency(%q<multi_json>, [">= 0"])
-    s.add_dependency(%q<rake>, [">= 0"])
   end
 end
 
