@@ -21,13 +21,6 @@ Jeweler::Tasks.new do |gem|
   gem.description = %Q{Simple redis based worker queue with a HTTP/Rest interface}
   gem.email = "kiessler@inceedo.com"
   gem.authors = ["Oliver Kiessler"]
-  gem.add_runtime_dependency 'sinatra'
-  gem.add_runtime_dependency 'sinatra-contrib'
-  gem.add_runtime_dependency 'rest-client'
-  gem.add_runtime_dependency 'redis'
-  gem.add_runtime_dependency 'json'
-  gem.add_runtime_dependency 'multi_json'
-  gem.add_runtime_dependency 'rake'
 end
 Jeweler::RubygemsDotOrgTasks.new
 
