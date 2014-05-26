@@ -49,3 +49,5 @@ pkg
 #*.rbc
 
 .rake_tasks~
+
+dump.rdb

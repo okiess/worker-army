@@ -13,7 +13,6 @@ require 'rake'
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
   gem.name = "worker-army"
   gem.homepage = "http://github.com/okiess/worker-army"
   gem.license = "MIT"
@@ -49,6 +48,7 @@ task 'start_example_worker' do
   worker.process_queue
 end
 
+desc "Start a worker-army worker to execute a job class"
 task :start_worker, :job_class do |t, args|
   if args[:job_class]
     worker = WorkerArmy::Worker.new

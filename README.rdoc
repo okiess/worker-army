@@ -1,6 +1,6 @@
 = worker-army
 
-Description goes here.
+Simple redis based worker queue with a HTTP/Rest interface.
 
 == Contributing to worker-army
  
@@ -14,6 +14,5 @@ Description goes here.
 
 == Copyright
 
-Copyright (c) 2013 Oliver Kiessler. See LICENSE.txt for
+Copyright (c) 2013-2014 Oliver Kiessler. See LICENSE.txt for
 further details.
-
