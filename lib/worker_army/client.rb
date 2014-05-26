@@ -34,12 +34,22 @@ module WorkerArmy
       rescue => e
         puts "Failed! Retrying (#{retry_count})..."
         retry_count += 1
-        if retry_count < (@config['client_retry_count'] ? @config['client_retry_count'].to_i : 10)
+        if retry_count < client_retry_count(@config)
           sleep (retry_count * 2)
           push_job(job_class, data, callback_url, queue_name, retry_count)
         end
       end
       (response and response.code == 200)
+    end
+    
+    def self.client_retry_count(config)
+      if ENV['worker_army_client_retry_count']
+        return ENV['worker_army_client_retry_count'].to_i
+      elsif config and config['client_retry_count']
+        return config['client_retry_count'].to_i
+      else
+        return 10
+      end
     end
   end
 end
