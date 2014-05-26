@@ -2,3 +2,4 @@ endpoint: "http://localhost:9292"
 redis_host: "localhost"
 redis_port: 6379
 redis_auth: "YOUR_PASS"
+client_retry_count: 10
