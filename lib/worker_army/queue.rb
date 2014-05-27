@@ -3,6 +3,7 @@ require "rest-client"
 require "json"
 require "multi_json"
 require "yaml"
+require "logger"
 
 module WorkerArmy
   class Queue
@@ -12,37 +13,40 @@ module WorkerArmy
       @config = Queue.config
       # puts "Config: #{@config}"
       Queue.redis_instance
-    end
-    
-    def self.config
-      if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
-        config = { 'redis_host' => ENV['worker_army_redis_host'], 'redis_port' => ENV['worker_army_redis_port'] }
-        if ENV['worker_army_redis_auth']
-          config['redis_auth'] = ENV['worker_army_redis_auth']
-        end
-      else
-        begin
-          # puts "Using config in your home directory"
-          config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
-        rescue Errno::ENOENT
-          raise "worker_army.yml expected in ~/.worker_army.yml"
-        end
-      end
-      config
+      @log = $WORKER_ARMY_LOG
     end
 
-    def self.redis_instance
-      $config = Queue.config unless $config
-      unless $redis
-        $redis = Redis.new(host: $config['redis_host'], port: $config['redis_port'])
+    class << self
+      def config
+        if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
+          config = { 'redis_host' => ENV['worker_army_redis_host'], 'redis_port' => ENV['worker_army_redis_port'] }
+          if ENV['worker_army_redis_auth']
+            config['redis_auth'] = ENV['worker_army_redis_auth']
+          end
+        else
+          begin
+            # puts "Using config in your home directory"
+            config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
+          rescue Errno::ENOENT
+            raise "worker_army.yml expected in ~/.worker_army.yml"
+          end
+        end
+        config
       end
-      $redis.auth($config['redis_auth']) if $config['redis_auth']
-      $redis
-    end
 
-    def self.close_redis_connection
-      $redis.quit if $redis
-      $redis = nil
+      def redis_instance
+        $config = Queue.config unless $config
+        unless $redis
+          $redis = Redis.new(host: $config['redis_host'], port: $config['redis_port'])
+        end
+        $redis.auth($config['redis_auth']) if $config['redis_auth']
+        $redis
+      end
+
+      def close_redis_connection
+        $redis.quit if $redis
+        $redis = nil
+      end
     end
 
     def push(data, queue_prefix = "queue")
@@ -76,7 +80,7 @@ module WorkerArmy
             response = RestClient.post callback_url.split("?callback_url=").last,
               data.to_json, :content_type => :json, :accept => :json
           rescue => e
-            puts e
+            @log.error(e)
           end
         end
       end
@@ -93,11 +97,23 @@ module WorkerArmy
 
     def get_known_workers(recent_worker_pings = 1000)
       worker_pings = Queue.redis_instance.lrange 'workers', 0, recent_worker_pings
-      worker_pings ? worker_pings.collect {|json| JSON.parse(json)} : []
+      return [] unless worker_pings
+      worker_pings = worker_pings.collect {|json| JSON.parse(json)}.sort {|h| h['timestamp']}.reverse
+      uniq_workers = worker_pings.collect {|h| [h['host_name'], h['worker_pid']]}.uniq
+      workers = []
+      uniq_workers.each do |worker_pair|
+        worker_pings.each do |hash|
+          if hash['host_name'] == worker_pair[0] and hash['worker_pid'] == worker_pair[1]
+            workers << hash
+            break
+          end
+        end
+      end
+      workers
     end
 
-    def get_job_count(queue_name = "queue")
-      Queue.redis_instance["#{queue_name}_counter"]
+    def get_job_count(queue_prefix = "queue")
+      Queue.redis_instance["#{queue_prefix}_counter"]
     end
   end
 end

@@ -18,14 +18,16 @@ module WorkerArmy
       rescue Errno::ENOENT
         # ignore
       end
+      @log = $WORKER_ARMY_LOG
     end
 
     def process_queue
       raise "No job class set!" unless @job
+      @job.log = @log if @job.respond_to?(:log)
       @queue.ping(worker_pid: Process.pid, job_name: @job.class.name, host_name: @host_name,
         timestamp: Time.now.utc.to_i)
-      puts "Worker ready! Waiting for jobs: #{@job.class.name}"
-      puts "Processed: #{@processed} - Failed: #{@failed}"
+      @log.info("Worker ready! Waiting for jobs: #{@job.class.name}")
+      @log.info("Processed: #{@processed} - Failed: #{@failed}")
       list, element = @queue.pop(@job.class.name)
       if list and element
         execute_job(list, element, 0)
@@ -34,7 +36,7 @@ module WorkerArmy
 
     private
     def execute_job(list, element, retry_count = 0)
-      puts "Queue: #{list} => #{element}" if retry_count == 0
+      @log.debug("Queue: #{list} => #{element}") if retry_count == 0
       response_data = {}
       job_count = 0
       begin
@@ -53,10 +55,10 @@ module WorkerArmy
         end
         response_data
       rescue => e
-        puts e
+        @log.error(e)
         retry_count += 1
         if retry_count < worker_retry_count(@config)
-          puts "Failed! Retrying (#{retry_count})..."
+          @log.debug("Failed! Retrying (#{retry_count})...")
           sleep (retry_count * 2)
           execute_job(list, element, retry_count)
         else
@@ -67,7 +69,7 @@ module WorkerArmy
         response = RestClient.post data['callback_url'],
           response_data.to_json, :content_type => :json, :accept => :json
       rescue => e
-        puts e
+        @logger.error(e)
       end
       self.process_queue
     end

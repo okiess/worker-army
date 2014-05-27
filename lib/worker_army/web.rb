@@ -9,7 +9,7 @@ queue = WorkerArmy::Queue.new
 get '/' do
   job_count = queue.get_job_count || 0
   workers = queue.get_known_workers
-  last_ping = queue.last_ping || 0
+  last_ping = queue.last_ping || 0
   data = { job_count: job_count, workers: workers,
     last_ping: last_ping.to_i  }
   json data
