@@ -9,14 +9,16 @@ queue = WorkerArmy::Queue.new
 get '/' do
   job_count = queue.get_job_count || 0
   workers = queue.get_known_workers
-  data = { job_count: job_count, workers: workers }
+  last_ping = queue.last_ping || 0
+  data = { job_count: job_count, workers: workers,
+    last_ping: last_ping.to_i  }
   json data
 end
 
 post '/jobs' do
   data = JSON.parse(request.body.read)
-  queue.push data if data
-  json data
+  queue_job = queue.push data if data
+  json queue_job
 end
 
 post '/callback' do

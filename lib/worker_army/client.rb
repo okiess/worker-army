@@ -4,7 +4,7 @@ require "multi_json"
 
 module WorkerArmy
   class Client
-    def self.push_job(job_class, data = {}, callback_url = nil, queue_name = 'queue', retry_count = 0)
+    def self.push_job(job_class, data = {}, callback_url = nil, queue_prefix = 'queue', retry_count = 0)
       raise "No data" unless data
       raise "No job class provided" unless job_class
       
@@ -28,7 +28,7 @@ module WorkerArmy
           data.merge(
             job_class: job_class,
             callback_url: "#{worker_army_base_url}/callback?callback_url=#{callback_url}",
-            queue_name: queue_name
+            queue_prefix: queue_prefix
           ).to_json,
           :content_type => :json, :accept => :json
       rescue => e
@@ -36,12 +36,17 @@ module WorkerArmy
         retry_count += 1
         if retry_count < client_retry_count(@config)
           sleep (retry_count * 2)
-          push_job(job_class, data, callback_url, queue_name, retry_count)
+          push_job(job_class, data, callback_url, queue_prefix, retry_count)
         end
       end
-      (response and response.code == 200)
+      if response and response.body and response.code == 200
+        hash = JSON.parse(response.body)
+        hash.merge(success: true)
+      else
+        { success: false }
+      end
     end
-    
+
     def self.client_retry_count(config)
       if ENV['worker_army_client_retry_count']
         return ENV['worker_army_client_retry_count'].to_i

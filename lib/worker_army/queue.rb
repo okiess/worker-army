@@ -45,20 +45,24 @@ module WorkerArmy
       $redis = nil
     end
 
-    def push(data, queue_name = "queue")
+    def push(data, queue_prefix = "queue")
       if Queue.redis_instance and data
-        job_count = Queue.redis_instance.incr("#{queue_name}_counter")
-        queue_name = data['queue_name'] if data['queue_name']
-        queue_name = "#{queue_name}_#{data['job_class']}"
-        Queue.redis_instance.rpush queue_name, data.merge(job_count: job_count).to_json
+        job_count = Queue.redis_instance.incr("#{queue_prefix}_counter")
+        queue_prefix = queue_prefix if queue_prefix
+        queue_prefix = data['queue_prefix'] if data['queue_prefix']
+        queue_name = "#{queue_prefix}_#{data['job_class']}"
+        queue_count = Queue.redis_instance.incr("#{queue_name}_counter")
+        Queue.redis_instance.rpush queue_name, data.merge(job_count: job_count,
+          queue_count: queue_count, queue_name: queue_name).to_json
       end
       raise "No data" unless data
       raise "No redis connection!" unless Queue.redis_instance
+      { job_count: job_count, queue_count: queue_count, queue_name: queue_name }
     end
 
-    def pop(job_class_name, queue_name = "queue")
+    def pop(job_class_name, queue_prefix = "queue")
       raise "No redis connection!" unless Queue.redis_instance
-      return Queue.redis_instance.blpop("#{queue_name}_#{job_class_name}")
+      return Queue.redis_instance.blpop("#{queue_prefix}_#{job_class_name}")
     end
 
     def save_result(data)
@@ -80,6 +84,11 @@ module WorkerArmy
 
     def ping(data)
       Queue.redis_instance.lpush 'workers', data.to_json
+      Queue.redis_instance.set 'last_ping', data[:timestamp].to_i
+    end
+
+    def last_ping
+      Queue.redis_instance.get 'last_ping'
     end
 
     def get_known_workers(recent_worker_pings = 1000)
