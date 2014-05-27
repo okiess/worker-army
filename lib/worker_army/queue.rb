@@ -3,7 +3,7 @@ require "rest-client"
 require "json"
 require "multi_json"
 require "yaml"
-require "logger"
+require 'securerandom'
 
 module WorkerArmy
   class Queue
@@ -55,13 +55,16 @@ module WorkerArmy
         queue_prefix = queue_prefix if queue_prefix
         queue_prefix = data['queue_prefix'] if data['queue_prefix']
         queue_name = "#{queue_prefix}_#{data['job_class']}"
+        Queue.redis_instance.sadd 'known_queues', queue_name
         queue_count = Queue.redis_instance.incr("#{queue_name}_counter")
+        job_id = SecureRandom.uuid
         Queue.redis_instance.rpush queue_name, data.merge(job_count: job_count,
-          queue_count: queue_count, queue_name: queue_name).to_json
+          queue_count: queue_count, job_id: job_id, queue_name: queue_name).to_json
       end
       raise "No data" unless data
       raise "No redis connection!" unless Queue.redis_instance
-      { job_count: job_count, queue_count: queue_count, queue_name: queue_name }
+      { job_count: job_count, job_id: job_id, queue_count: queue_count,
+        queue_name: queue_name }
     end
 
     def pop(job_class_name, queue_prefix = "queue")
@@ -71,9 +74,10 @@ module WorkerArmy
 
     def save_result(data)
       if data
-        job_count = data['job_count']
+        job_id = data['job_id']
         callback_url = data['callback_url']
-        Queue.redis_instance["job_#{job_count}"] = data
+        Queue.redis_instance["job_#{job_id}"] = data
+        Queue.redis_instance.lpush 'jobs', job_id
         if callback_url
           data.delete("callback_url")
           begin
@@ -84,6 +88,14 @@ module WorkerArmy
           end
         end
       end
+    end
+
+    def add_failed_job(job_id)
+      Queue.redis_instance.lpush 'failed_jobs', job_id
+    end
+    
+    def failed_jobs
+      Queue.redis_instance.llen 'failed_jobs'
     end
 
     def ping(data)
@@ -98,7 +110,7 @@ module WorkerArmy
     def get_known_workers(recent_worker_pings = 1000)
       worker_pings = Queue.redis_instance.lrange 'workers', 0, recent_worker_pings
       return [] unless worker_pings
-      worker_pings = worker_pings.collect {|json| JSON.parse(json)}.sort {|h| h['timestamp']}.reverse
+      worker_pings = worker_pings.collect {|json| JSON.parse(json)}.sort_by {|h| h['timestamp'].to_i}.reverse
       uniq_workers = worker_pings.collect {|h| [h['host_name'], h['worker_pid']]}.uniq
       workers = []
       uniq_workers.each do |worker_pair|
@@ -111,9 +123,17 @@ module WorkerArmy
       end
       workers
     end
+    
+    def get_known_queues
+      Queue.redis_instance.smembers 'known_queues'
+    end
+
+    def finished_jobs
+      Queue.redis_instance.llen 'jobs'
+    end
 
     def get_job_count(queue_prefix = "queue")
-      Queue.redis_instance["#{queue_prefix}_counter"]
+      Queue.redis_instance["#{queue_prefix}_counter"].to_i
     end
   end
 end

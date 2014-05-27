@@ -41,12 +41,12 @@ module WorkerArmy
       job_count = 0
       begin
         data = JSON.parse(element)
-        job_count = data['job_count']
+        job_id = data['job_id']
         callback_url = data['callback_url']
         if @job and @job.class.name == data['job_class']
           response_data = @job.perform(data)
           response_data = {} unless response_data
-          response_data.merge!(job_count: job_count, callback_url: callback_url,
+          response_data.merge!(job_id: job_id, callback_url: callback_url,
             finished_at: Time.now.utc.to_i, host_name: @host_name)
           @processed += 1
           if @worker_name
@@ -63,6 +63,7 @@ module WorkerArmy
           execute_job(list, element, retry_count)
         else
           @failed += 1
+          @queue.add_failed_job(job_id)
         end
       end
       begin

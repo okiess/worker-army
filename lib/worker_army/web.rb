@@ -10,8 +10,13 @@ get '/' do
   job_count = queue.get_job_count || 0
   workers = queue.get_known_workers
   last_ping = queue.last_ping || 0
-  data = { job_count: job_count, workers: workers,
-    last_ping: last_ping.to_i  }
+  queues = queue.get_known_queues
+  finished_jobs = queue.finished_jobs
+  failed_jobs = queue.failed_jobs
+  data = { job_count: job_count, finished_jobs: finished_jobs,
+    failed_jobs: failed_jobs, workers: workers,
+    last_worker_ping: last_ping.to_i, queues: queues
+  }
   json data
 end
 
