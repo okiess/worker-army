@@ -18,7 +18,7 @@ module WorkerArmy
       rescue Errno::ENOENT
         # ignore
       end
-      @log = $WORKER_ARMY_LOG
+      @log = WorkerArmy::Log.new.log
     end
 
     def process_queue

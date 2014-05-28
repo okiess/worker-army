@@ -13,7 +13,7 @@ module WorkerArmy
       @config = Queue.config
       # puts "Config: #{@config}"
       Queue.redis_instance
-      @log = $WORKER_ARMY_LOG
+      @log = WorkerArmy::Log.new.log
     end
 
     class << self
