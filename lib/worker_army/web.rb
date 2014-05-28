@@ -2,7 +2,10 @@ require "json"
 require "multi_json"
 require "sinatra"
 require "sinatra/json"
+require File.dirname(__FILE__) + '/log'
 require File.dirname(__FILE__) + '/queue'
+
+$WORKER_ARMY_LOG = WorkerArmy::Log.new.log
 
 queue = WorkerArmy::Queue.new
 
