@@ -70,7 +70,7 @@ module WorkerArmy
         response = RestClient.post data['callback_url'],
           response_data.to_json, :content_type => :json, :accept => :json
       rescue => e
-        @logger.error(e)
+        @log.error(e)
       end
       self.process_queue
     end
