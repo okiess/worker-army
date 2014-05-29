@@ -76,6 +76,26 @@ module WorkerArmy
       end
     end
 
+    def add_current_job(job_id)
+      Queue.redis_instance.sadd 'current_jobs', job_id
+    end
+
+    def remove_current_job(job_id)
+      Queue.redis_instance.srem 'current_jobs', job_id
+    end
+    
+    def current_jobs_count
+      Queue.redis_instance.scard 'current_jobs'
+    end
+
+    def current_jobs
+      Queue.redis_instance.smembers 'current_jobs'
+    end
+    
+    def clear_current_jobs
+      Queue.redis_instance.del 'current_jobs'
+    end
+
     def job_data(job_id)
       Queue.redis_instance["job_#{job_id}"]
     end

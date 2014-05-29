@@ -41,6 +41,7 @@ module WorkerArmy
         job_id = data['job_id']
         callback_url = data['callback_url']
         if @job and @job.class.name == data['job_class']
+          @queue.add_current_job(job_id)
           response_data = @job.perform(data)
           response_data = {} unless response_data
           response_data.merge!(job_id: job_id, callback_url: callback_url,
@@ -50,8 +51,10 @@ module WorkerArmy
             response_data.merge!(worker_name: @worker_name)
           end
         end
+        @queue.remove_current_job(job_id)
         response_data
       rescue => e
+        @queue.remove_current_job(job_id)
         @log.error(e)
         retry_count += 1
         if retry_count < worker_retry_count(@config)

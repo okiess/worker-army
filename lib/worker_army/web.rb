@@ -19,9 +19,11 @@ get '/' do
   finished_jobs = queue.finished_jobs_count
   failed_callback_jobs = queue.failed_callback_jobs_count
   failed_jobs = queue.failed_jobs_count
+  current_jobs = queue.current_jobs
   data = { job_count: job_count, finished_jobs: finished_jobs,
     failed_jobs: failed_jobs, failed_callback_jobs: failed_callback_jobs,
-    workers: workers, last_worker_ping: last_ping.to_i, queues: queues
+    workers: workers, last_worker_ping: last_ping.to_i, queues: queues,
+    current_jobs: current_jobs
   }
   json data
 end
