@@ -67,7 +67,7 @@ module WorkerArmy
             if response.code == 404 or response.code == 500
               @log.error("Response from callback url: #{response.code}")
               add_failed_callback_job(job_id)
-            end 
+            end
           rescue => e
             @log.error(e)
             add_failed_callback_job(job_id)
@@ -87,15 +87,15 @@ module WorkerArmy
     def failed_jobs_count
       Queue.redis_instance.llen 'failed_jobs'
     end
-    
+
     def failed_jobs
       Queue.redis_instance.lrange 'failed_jobs', 0, failed_jobs_count
     end
-    
+
     def failed_callback_jobs_count
       Queue.redis_instance.llen 'failed_callback_jobs'
     end
-    
+
     def failed_callback_jobs
       Queue.redis_instance.lrange 'failed_callback_jobs', 0, failed_callback_jobs_count
     end
@@ -123,9 +123,10 @@ module WorkerArmy
           end
         end
       end
-      workers
+      now = Time.now.utc.to_i
+      workers.select {|h| h if now - h['timestamp'].to_i < 3600}
     end
-    
+
     def get_known_queues
       Queue.redis_instance.smembers 'known_queues'
     end
