@@ -4,9 +4,10 @@ require "json"
 require "multi_json"
 require "yaml"
 require 'securerandom'
+require File.dirname(__FILE__) + '/base'
 
 module WorkerArmy
-  class Queue
+  class Queue < Base
     attr_accessor :config
 
     def initialize
@@ -83,8 +84,13 @@ module WorkerArmy
           begin
             response = RestClient.post callback_url.split("?callback_url=").last,
               data.to_json, :content_type => :json, :accept => :json
+            if responde.code == 404 or responde.code == 500
+              @log.error("Response from callback url: #{response.code}")
+              add_failed_callback_job(job_id)
+            end 
           rescue => e
             @log.error(e)
+            add_failed_callback_job(job_id)
           end
         end
       end
@@ -93,9 +99,25 @@ module WorkerArmy
     def add_failed_job(job_id)
       Queue.redis_instance.lpush 'failed_jobs', job_id
     end
+
+    def add_failed_callback_job(job_id)
+      Queue.redis_instance.lpush 'failed_callback_jobs', job_id
+    end
+
+    def failed_jobs_count
+      Queue.redis_instance.llen 'failed_jobs'
+    end
     
     def failed_jobs
-      Queue.redis_instance.llen 'failed_jobs'
+      Queue.redis_instance.lrange 'failed_jobs', 0, failed_jobs_count
+    end
+    
+    def failed_callback_jobs_count
+      Queue.redis_instance.llen 'failed_callback_jobs'
+    end
+    
+    def failed_callback_jobs
+      Queue.redis_instance.lrange 'failed_callback_jobs', 0, failed_callback_jobs_count
     end
 
     def ping(data)
@@ -128,7 +150,7 @@ module WorkerArmy
       Queue.redis_instance.smembers 'known_queues'
     end
 
-    def finished_jobs
+    def finished_jobs_count
       Queue.redis_instance.llen 'jobs'
     end
 
