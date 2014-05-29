@@ -2,12 +2,14 @@ require "rest-client"
 require "json"
 require "multi_json"
 require 'socket'
+require File.dirname(__FILE__) + '/base'
 
 module WorkerArmy
-  class Worker
+  class Worker < Base
     attr_accessor :queue, :job, :worker_name, :processed, :failed, :config
-    def initialize(worker_name = nil)
+    def initialize(job, worker_name = nil)
       @queue = WorkerArmy::Queue.new
+      @job = job
       @worker_name = worker_name
       @host_name = Socket.gethostname
       @processed = 0
@@ -26,8 +28,8 @@ module WorkerArmy
       @job.log = @log if @job.respond_to?(:log)
       @queue.ping(worker_pid: Process.pid, job_name: @job.class.name, host_name: @host_name,
         timestamp: Time.now.utc.to_i)
-      @log.info("Worker ready! Waiting for jobs: #{@job.class.name}")
-      @log.info("Processed: #{@processed} - Failed: #{@failed}")
+      @log.info("Worker #{@host_name}-#{Process.pid} => Queue: queue_#{@job.class.name}")
+      @log.info("Worker #{@host_name}-#{Process.pid} => Processed: #{@processed} - Failed: #{@failed}")
       list, element = @queue.pop(@job.class.name)
       if list and element
         execute_job(list, element, 0)
