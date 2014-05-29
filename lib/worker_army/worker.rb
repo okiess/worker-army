@@ -6,7 +6,7 @@ require File.dirname(__FILE__) + '/base'
 
 module WorkerArmy
   class Worker < Base
-    attr_accessor :queue, :job, :worker_name, :processed, :failed, :config
+    attr_accessor :queue, :job, :worker_name, :processed, :failed
     def initialize(job, worker_name = nil)
       @queue = WorkerArmy::Queue.new
       @job = job
@@ -14,12 +14,7 @@ module WorkerArmy
       @host_name = Socket.gethostname
       @processed = 0
       @failed = 0
-      begin
-        # puts "Using config in your home directory"
-        @config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
-      rescue Errno::ENOENT
-        # ignore
-      end
+      @config = self.config
       @log = WorkerArmy::Log.new.log
     end
 
@@ -77,11 +72,11 @@ module WorkerArmy
       self.process_queue
     end
 
-    def worker_retry_count(config = nil)
+    def worker_retry_count(conf = nil)
       if ENV['worker_army_worker_retry_count']
         return ENV['worker_army_worker_retry_count'].to_i
-      elsif config and config['worker_retry_count']
-        return config['worker_retry_count'].to_i
+      elsif conf and conf['worker_retry_count']
+        return conf['worker_retry_count'].to_i
       else
         return 10
       end

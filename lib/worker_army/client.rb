@@ -1,26 +1,16 @@
 require "rest-client"
 require "json"
 require "multi_json"
+require File.dirname(__FILE__) + '/base'
 
 module WorkerArmy
-  class Client
+  class Client < Base
     class << self
       def push_job(job_class, data = {}, callback_url = nil, queue_prefix = 'queue', retry_count = 0)
         raise "No data" unless data
         raise "No job class provided" unless job_class
-        
-        if ENV['worker_army_endpoint']
-          # puts "Using environment variables for config..."
-          @config = { endpoint: ENV['worker_army_endpoint'] }
-        else
-          begin
-            # puts "Using config in your home directory"
-            @config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
-          rescue Errno::ENOENT
-            raise "worker_army.yml expected in ~/.worker_army.yml"
-          end
-        end
 
+        @config = self.config
         worker_army_base_url = @config['endpoint']
         callback_url = "#{worker_army_base_url}/generic_callback" unless callback_url
         response = nil
@@ -48,11 +38,11 @@ module WorkerArmy
         end
       end
 
-      def client_retry_count(config)
+      def client_retry_count(conf = nil)
         if ENV['worker_army_client_retry_count']
           return ENV['worker_army_client_retry_count'].to_i
-        elsif config and config['client_retry_count']
-          return config['client_retry_count'].to_i
+        elsif conf and conf['client_retry_count']
+          return conf['client_retry_count'].to_i
         else
           return 10
         end

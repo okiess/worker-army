@@ -8,35 +8,15 @@ require File.dirname(__FILE__) + '/base'
 
 module WorkerArmy
   class Queue < Base
-    attr_accessor :config
-
     def initialize
-      @config = Queue.config
-      # puts "Config: #{@config}"
+      @config = self.config
       Queue.redis_instance
       @log = WorkerArmy::Log.new.log
     end
 
     class << self
-      def config
-        if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
-          config = { 'redis_host' => ENV['worker_army_redis_host'], 'redis_port' => ENV['worker_army_redis_port'] }
-          if ENV['worker_army_redis_auth']
-            config['redis_auth'] = ENV['worker_army_redis_auth']
-          end
-        else
-          begin
-            # puts "Using config in your home directory"
-            config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
-          rescue Errno::ENOENT
-            raise "worker_army.yml expected in ~/.worker_army.yml"
-          end
-        end
-        config
-      end
-
       def redis_instance
-        $config = Queue.config unless $config
+        $config = self.config unless $config
         unless $redis
           $redis = Redis.new(host: $config['redis_host'], port: $config['redis_port'])
         end
@@ -84,7 +64,7 @@ module WorkerArmy
           begin
             response = RestClient.post callback_url.split("?callback_url=").last,
               data.to_json, :content_type => :json, :accept => :json
-            if responde.code == 404 or responde.code == 500
+            if response.code == 404 or response.code == 500
               @log.error("Response from callback url: #{response.code}")
               add_failed_callback_job(job_id)
             end 
