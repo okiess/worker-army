@@ -57,7 +57,7 @@ module WorkerArmy
       if data
         job_id = data['job_id']
         callback_url = data['callback_url']
-        Queue.redis_instance["job_#{job_id}"] = data
+        Queue.redis_instance["job_#{job_id}"] = data.to_json
         Queue.redis_instance.lpush 'jobs', job_id
         if callback_url
           data.delete("callback_url")
@@ -74,6 +74,10 @@ module WorkerArmy
           end
         end
       end
+    end
+
+    def job_data(job_id)
+      Queue.redis_instance["job_#{job_id}"]
     end
 
     def add_failed_job(job_id)

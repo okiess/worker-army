@@ -7,6 +7,10 @@ require File.dirname(__FILE__) + '/queue'
 
 queue = WorkerArmy::Queue.new
 
+before do
+  content_type 'application/json', :charset => 'utf-8'
+end
+
 get '/' do
   job_count = queue.get_job_count || 0
   workers = queue.get_known_workers
@@ -26,6 +30,11 @@ post '/jobs' do
   data = JSON.parse(request.body.read)
   queue_job = queue.push data if data
   json queue_job
+end
+
+get '/jobs/:job_id' do
+  data = queue.job_data(params[:job_id])
+  json JSON.parse(data)
 end
 
 post '/callback' do
