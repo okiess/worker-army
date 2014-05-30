@@ -32,9 +32,9 @@ module WorkerArmy
         end
         if response and response.body and response.code == 200
           hash = JSON.parse(response.body)
-          hash.merge(success: true)
+          hash.merge('success' => true)
         else
-          { success: false }
+          { 'success' => false }
         end
       end
 
