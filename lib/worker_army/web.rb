@@ -36,7 +36,7 @@ end
 
 get '/jobs/:job_id' do
   data = queue.job_data(params[:job_id])
-  json JSON.parse(data)
+  json data ? JSON.parse(data): {}
 end
 
 post '/callback' do

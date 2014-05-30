@@ -4,3 +4,4 @@ redis_port: 6379
 redis_auth: "YOUR_PASS"
 client_retry_count: 10
 worker_retry_count: 10
+callback_retry_count: 5

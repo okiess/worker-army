@@ -37,16 +37,6 @@ module WorkerArmy
           { 'success' => false }
         end
       end
-
-      def client_retry_count(conf = nil)
-        if ENV['worker_army_client_retry_count']
-          return ENV['worker_army_client_retry_count'].to_i
-        elsif conf and conf['client_retry_count']
-          return conf['client_retry_count'].to_i
-        else
-          return 10
-        end
-      end
     end
   end
 end

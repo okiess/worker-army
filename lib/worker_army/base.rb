@@ -15,6 +15,9 @@ module WorkerArmy
           if ENV['worker_army_client_retry_count']
             config['client_retry_count'] = ENV['worker_army_client_retry_count'].to_i
           end
+          if ENV['worker_army_callback_retry_count']
+            config['callback_retry_count'] = ENV['worker_army_callback_retry_count'].to_i
+          end
           if ENV['worker_army_endpoint']
             config['endpoint'] = ENV['worker_army_endpoint']
           end
@@ -27,6 +30,36 @@ module WorkerArmy
           end
         end
         config
+      end
+      
+      def client_retry_count(conf = nil)
+        if ENV['worker_army_client_retry_count']
+          return ENV['worker_army_client_retry_count'].to_i
+        elsif conf and conf['client_retry_count']
+          return conf['client_retry_count'].to_i
+        else
+          return 10
+        end
+      end
+    end
+
+    def worker_retry_count(conf = nil)
+      if ENV['worker_army_worker_retry_count']
+        return ENV['worker_army_worker_retry_count'].to_i
+      elsif conf and conf['worker_retry_count']
+        return conf['worker_retry_count'].to_i
+      else
+        return 10
+      end
+    end
+
+    def callback_retry_count(conf = nil)
+      if ENV['worker_army_callback_retry_count']
+        return ENV['worker_army_callback_retry_count'].to_i
+      elsif conf and conf['callback_retry_count']
+        return conf['callback_retry_count'].to_i
+      else
+        return 3
       end
     end  
   end

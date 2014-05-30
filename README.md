@@ -29,6 +29,7 @@ If you can't provide or don't want to provide the config file at that location, 
      worker_army_redis_auth
      worker_army_worker_retry_count
      worker_army_client_retry_count
+     worker_army_callback_retry_count
 
 ## Server / Queue
 

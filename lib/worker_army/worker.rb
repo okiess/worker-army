@@ -42,23 +42,27 @@ module WorkerArmy
         callback_url = data['callback_url']
         if @job and @job.class.name == data['job_class']
           @queue.add_current_job(job_id)
+          started_at = Time.now.utc.to_i
           response_data = @job.perform(data)
           response_data = {} unless response_data
-          response_data.merge!(job_id: job_id, callback_url: callback_url,
-            finished_at: Time.now.utc.to_i, host_name: @host_name)
-          @processed += 1
+          if callback_url and not callback_url.empty?
+            response_data.merge!(callback_url: callback_url)
+          end
+          response_data.merge!(job_id: job_id, started_at: started_at,
+            finished_at: Time.now.utc.to_i, host_name: @host_name,
+            worker_pid: Process.pid)
           if @worker_name
             response_data.merge!(worker_name: @worker_name)
           end
+          @processed += 1
         end
         @queue.remove_current_job(job_id)
-        response_data
       rescue => e
         @queue.remove_current_job(job_id)
         @log.error(e)
         retry_count += 1
         if retry_count < worker_retry_count(@config)
-          @log.debug("Failed! Retrying (#{retry_count})...")
+          @log.debug("Job execution failed! Retrying (#{retry_count})...")
           sleep (retry_count * 2)
           execute_job(list, element, retry_count)
         else
@@ -66,22 +70,24 @@ module WorkerArmy
           @queue.add_failed_job(job_id)
         end
       end
+      if callback_url and not callback_url.empty?
+        deliver_callback(data, response_data)
+      end
+      self.process_queue
+    end
+
+    def deliver_callback(data, response_data, retry_count = 0)
       begin
         response = RestClient.post data['callback_url'],
           response_data.to_json, :content_type => :json, :accept => :json
       rescue => e
         @log.error(e)
-      end
-      self.process_queue
-    end
-
-    def worker_retry_count(conf = nil)
-      if ENV['worker_army_worker_retry_count']
-        return ENV['worker_army_worker_retry_count'].to_i
-      elsif conf and conf['worker_retry_count']
-        return conf['worker_retry_count'].to_i
-      else
-        return 10
+        retry_count += 1
+        if retry_count < callback_retry_count(@config)
+          @log.debug("Delivering worker-army callback failed! Retrying (#{retry_count})...")
+          sleep (retry_count * 2)
+          deliver_callback(data, response_data, retry_count)
+        end
       end
     end
   end

@@ -61,17 +61,28 @@ module WorkerArmy
         Queue.redis_instance.lpush 'jobs', job_id
         if callback_url
           data.delete("callback_url")
-          begin
-            response = RestClient.post callback_url.split("?callback_url=").last,
-              data.to_json, :content_type => :json, :accept => :json
-            if response.code == 404 or response.code == 500
-              @log.error("Response from callback url: #{response.code}")
-              add_failed_callback_job(job_id)
-            end
-          rescue => e
-            @log.error(e)
-            add_failed_callback_job(job_id)
-          end
+          deliver_callback(job_id, callback_url, data)
+        end
+      end
+    end
+
+    def deliver_callback(job_id, callback_url, data, retry_count = 0)
+      begin
+        response = RestClient.post callback_url.split("?callback_url=").last,
+          data.to_json, :content_type => :json, :accept => :json
+        if response.code == 404 or response.code == 500
+          @log.error("Response from callback url: #{response.code}")
+          add_failed_callback_job(job_id)
+        end
+      rescue => e
+        @log.error(e)
+        retry_count += 1
+        if retry_count < callback_retry_count(@config)
+          @log.debug("Delivering external callback failed! Retrying (#{retry_count})...")
+          sleep (retry_count * 2)
+          deliver_callback(job_id, callback_url, data, retry_count)
+        else
+          add_failed_callback_job(job_id)
         end
       end
     end
