@@ -9,9 +9,7 @@ module WorkerArmy
       def push_job(job_class, data = {}, callback_url = nil, queue_prefix = 'queue', retry_count = 0)
         raise "No data" unless data
         raise "No job class provided" unless job_class
-
-        @config = self.config
-        worker_army_base_url = @config['endpoint']
+        worker_army_base_url = config['endpoint']
         callback_url = "#{worker_army_base_url}/generic_callback" unless callback_url
         response = nil
         begin
@@ -25,7 +23,7 @@ module WorkerArmy
         rescue => e
           puts "Failed! Retrying (#{retry_count})..."
           retry_count += 1
-          if retry_count < client_retry_count(@config)
+          if retry_count < client_retry_count(config)
             sleep (retry_count * 2)
             push_job(job_class, data, callback_url, queue_prefix, retry_count)
           end

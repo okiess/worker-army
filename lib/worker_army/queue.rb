@@ -9,14 +9,14 @@ require File.dirname(__FILE__) + '/base'
 module WorkerArmy
   class Queue < Base
     def initialize
-      @config = self.config
+      @config = config
       Queue.redis_instance
       @log = WorkerArmy::Log.new.log
     end
 
     class << self
       def redis_instance
-        $config = self.config unless $config
+        $config = config unless $config
         unless $redis
           $redis = Redis.new(host: $config['redis_host'], port: $config['redis_port'])
         end
@@ -57,7 +57,9 @@ module WorkerArmy
       if data
         job_id = data['job_id']
         callback_url = data['callback_url']
-        Queue.redis_instance["job_#{job_id}"] = data.to_json
+        if @config['store_job_data']
+          Queue.redis_instance["job_#{job_id}"] = data.to_json
+        end
         Queue.redis_instance.lpush 'jobs', job_id
         if callback_url
           data.delete("callback_url")

@@ -1,9 +1,8 @@
 module WorkerArmy
   class Base
-    attr_accessor :config
-
     class << self
       def config
+        return $config if $config
         if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
           config = { 'redis_host' => ENV['worker_army_redis_host'], 'redis_port' => ENV['worker_army_redis_port'] }
           if ENV['worker_army_redis_auth']
@@ -21,6 +20,9 @@ module WorkerArmy
           if ENV['worker_army_endpoint']
             config['endpoint'] = ENV['worker_army_endpoint']
           end
+          if ENV['worker_army_store_job_data']
+            config['store_job_data'] = (ENV['worker_army_store_job_data'] == 'true')
+          end
         else
           begin
             # puts "Using config in your home directory"
@@ -29,9 +31,9 @@ module WorkerArmy
             raise "worker-army configuration expected in ~/.worker_army.yml or provide env vars..."
           end
         end
-        config
+        $config = config
       end
-      
+
       def client_retry_count(conf = nil)
         if ENV['worker_army_client_retry_count']
           return ENV['worker_army_client_retry_count'].to_i
@@ -41,6 +43,10 @@ module WorkerArmy
           return 10
         end
       end
+    end
+
+    def config
+      WorkerArmy::Base.config
     end
 
     def worker_retry_count(conf = nil)
