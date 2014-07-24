@@ -42,7 +42,7 @@ Rake::RDocTask.new do |rdoc|
 end
 
 require File.dirname(__FILE__) + '/lib/worker-army'
-task 'start_example_worker' do
+task 'start_example_workers' do
   WorkerArmy::Worker.new([ExampleJob.new, AnotherJob.new]).process_queue
 end
 

@@ -42,7 +42,7 @@ or use Foreman (checkout `Procfile`)
 
     $ foreman start
 
-You easily run the worker-army server on heroku. It should work out of the box. You're just going to have provide the configuration environment variables.
+You easily run the worker-army server on heroku. It should work out of the box (you'll need to setup a redis database though). You're just going to have provide the configuration environment variables.
 
 You can open the server status overview by calling the server root url:
 
@@ -64,7 +64,7 @@ Provide an (optional) URL as the last argument and worker-army will return the j
 
 ## Workers
 
-You can start up a worker with numerous job classes assigned with the following:
+You can start up a worker with numerous job classes assigned to it with the following:
 
     $ rake start_worker[ExampleJob,AnotherJob]
 
