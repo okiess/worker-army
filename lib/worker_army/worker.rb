@@ -28,11 +28,9 @@ module WorkerArmy
 
     def process_queue
       raise "No job classes set!" if @jobs.nil? or @jobs.size == 0
-      @jobs.each do |job|
-        @queue.ping(worker_pid: Process.pid, job_name: job.class.name, host_name: @host_name,
-          timestamp: Time.now.utc.to_i)
-        @log.info("Worker #{@host_name}-#{Process.pid} => Queue: queue_#{job.class.name}")
-      end
+      @queue.ping(worker_pid: Process.pid, job_names: @job_names.join(", "), host_name: @host_name,
+        timestamp: Time.now.utc.to_i)
+      @job_names.each {|job| @log.info("Worker #{@host_name}-#{Process.pid} => Queue: queue_#{job.class.name}")}
       @log.info("Worker #{@host_name}-#{Process.pid} => Processed: #{@processed} - Failed: #{@failed}")
       list, element = @queue.pop(@jobs)
       if list and element
