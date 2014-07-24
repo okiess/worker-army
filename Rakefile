@@ -47,10 +47,11 @@ task 'start_example_workers' do
 end
 
 desc "Start a worker-army worker to execute job classes"
-task :start_worker, :job_classes do |t, args|
-  if args[:job_classes]
+task :start_worker, :job_classes do |t|
+  ARGV.shift
+  if ARGV and ARGV.size > 0
     clazzes = []
-    args[:job_classes].to_s.split(",").each do |jc|
+    ARGV.each do |jc|
       clazzes << Object.const_get(jc.lstrip.rstrip).new
     end
     WorkerArmy::Worker.new(clazzes).process_queue
