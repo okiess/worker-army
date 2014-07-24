@@ -3,7 +3,7 @@ class ExampleJob
 
   def perform(data = {})
     response_data = {foo: 'bar'}
-    log.debug("in example worker with data: #{data}")
+    log.debug("in example job with data: #{data}")
     sleep 2
     response_data
   end

@@ -48,9 +48,9 @@ module WorkerArmy
         queue_name: queue_name }
     end
 
-    def pop(job_class_name, queue_prefix = "queue")
+    def pop(job_instances, queue_prefix = "queue")
       raise "No redis connection!" unless Queue.redis_instance
-      return Queue.redis_instance.blpop("#{queue_prefix}_#{job_class_name}")
+      return Queue.redis_instance.blpop(job_instances.collect {|j| "#{queue_prefix}_#{j.class.name}"})
     end
 
     def save_result(data)

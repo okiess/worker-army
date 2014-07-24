@@ -6,26 +6,35 @@ require File.dirname(__FILE__) + '/base'
 
 module WorkerArmy
   class Worker < Base
-    attr_accessor :queue, :job, :worker_name, :processed, :failed
-    def initialize(job, worker_name = nil)
+    attr_accessor :queue, :jobs, :job_names, :worker_name, :processed, :failed
+    def initialize(jobs, worker_name = nil)
       @queue = WorkerArmy::Queue.new
-      @job = job
+      @log = WorkerArmy::Log.new.log
+      @job_names = []
+      @jobs = jobs
+      if @jobs and @jobs.size > 0
+        @jobs.each do |job|
+          job.log = @log if job.respond_to?(:log)
+          @job_names << job.class.name
+        end
+      end
+      @job_names = @job_names.uniq
       @worker_name = worker_name
       @host_name = Socket.gethostname
       @processed = 0
       @failed = 0
       @config = self.config
-      @log = WorkerArmy::Log.new.log
     end
 
     def process_queue
-      raise "No job class set!" unless @job
-      @job.log = @log if @job.respond_to?(:log)
-      @queue.ping(worker_pid: Process.pid, job_name: @job.class.name, host_name: @host_name,
-        timestamp: Time.now.utc.to_i)
-      @log.info("Worker #{@host_name}-#{Process.pid} => Queue: queue_#{@job.class.name}")
+      raise "No job classes set!" if @jobs.nil? or @jobs.size == 0
+      @jobs.each do |job|
+        @queue.ping(worker_pid: Process.pid, job_name: job.class.name, host_name: @host_name,
+          timestamp: Time.now.utc.to_i)
+        @log.info("Worker #{@host_name}-#{Process.pid} => Queue: queue_#{job.class.name}")
+      end
       @log.info("Worker #{@host_name}-#{Process.pid} => Processed: #{@processed} - Failed: #{@failed}")
-      list, element = @queue.pop(@job.class.name)
+      list, element = @queue.pop(@jobs)
       if list and element
         execute_job(list, element, 0)
       end
@@ -40,10 +49,10 @@ module WorkerArmy
         data = JSON.parse(element)
         job_id = data['job_id']
         callback_url = data['callback_url']
-        if @job and @job.class.name == data['job_class']
+        if @jobs and @job_names.include?(data['job_class'])
           @queue.add_current_job(job_id)
           started_at = Time.now.utc.to_i
-          response_data = @job.perform(data)
+          response_data = @jobs.select {|j| j.class.name == data['job_class']}.first.perform(data)
           response_data = {} unless response_data
           if callback_url and not callback_url.empty?
             response_data.merge!(callback_url: callback_url)

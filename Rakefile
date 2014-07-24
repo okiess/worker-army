@@ -43,13 +43,16 @@ end
 
 require File.dirname(__FILE__) + '/lib/worker-army'
 task 'start_example_worker' do
-  WorkerArmy::Worker.new(ExampleJob.new).process_queue
+  WorkerArmy::Worker.new([ExampleJob.new, AnotherJob.new]).process_queue
 end
 
-desc "Start a worker-army worker to execute a job class"
-task :start_worker, :job_class do |t, args|
-  if args[:job_class]
-    clazz = Object.const_get(args[:job_class].to_s)
-    WorkerArmy::Worker.new(clazz.new).process_queue
+desc "Start a worker-army worker to execute job classes"
+task :start_worker, :job_classes do |t, args|
+  if args[:job_classes]
+    clazzes = []
+    args[:job_classes].to_s.split(",").each do |jc|
+      clazzes << Object.const_get(jc.lstrip.rstrip).new
+    end
+    WorkerArmy::Worker.new(clazzes).process_queue
   end
 end

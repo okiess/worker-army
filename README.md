@@ -64,9 +64,9 @@ Provide an (optional) URL as the last argument and worker-army will return the j
 
 ## Workers
 
-You can start up a worker with a job class assigned with the following:
+You can start up a worker with numerous job classes assigned with the following:
 
-    $ rake start_worker[ExampleJob]
+    $ rake start_worker[ExampleJob,AnotherJob]
 
 ## Jobs
 
