@@ -5,6 +5,7 @@ gem "redis"
 gem "multi_json"
 gem "sinatra"
 gem "sinatra-contrib"
+gem "sinatra-basic-auth"
 gem "rest-client"
 gem "rake"
 gem 'unicorn'

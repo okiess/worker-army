@@ -2,16 +2,24 @@ require "json"
 require "multi_json"
 require "sinatra"
 require "sinatra/json"
+require "sinatra/basic_auth"
 require File.dirname(__FILE__) + '/log'
 require File.dirname(__FILE__) + '/queue'
 
 queue = WorkerArmy::Queue.new
+auth = false
+if queue.config['use_basic_auth'] and queue.config['basic_auth_username'] and queue.config['basic_auth_password']
+  authorize do |username, password|
+    username == queue.config['basic_auth_username'] && password == queue.config['basic_auth_password']
+  end
+  auth = true
+end
 
 before do
   content_type 'application/json', :charset => 'utf-8'
 end
 
-get '/' do
+def overview(queue)
   job_count = queue.get_job_count || 0
   workers = queue.get_known_workers
   last_ping = queue.last_ping || 0
@@ -25,7 +33,18 @@ get '/' do
     workers: workers, last_worker_ping: last_ping.to_i, queues: queues,
     current_jobs: current_jobs
   }
-  json data
+end
+
+if auth
+  protect do
+    get "/" do
+      json overview(queue)
+    end
+  end
+else
+  get '/' do
+    json overview(queue)
+  end
 end
 
 post '/jobs' do

@@ -6,3 +6,6 @@ client_retry_count: 10
 worker_retry_count: 10
 callback_retry_count: 5
 store_job_data: true
+use_basic_auth: false
+basic_auth_username: "admin"
+basic_auth_password: "something"

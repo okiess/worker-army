@@ -23,6 +23,15 @@ module WorkerArmy
           if ENV['worker_army_store_job_data']
             config['store_job_data'] = (ENV['worker_army_store_job_data'] == 'true')
           end
+          if ENV['worker_army_use_basic_auth']
+            config['use_basic_auth'] = (ENV['worker_army_use_basic_auth'] == 'true')
+          end
+          if ENV['worker_army_basic_auth_username']
+            config['basic_auth_username'] = ENV['worker_army_basic_auth_username']
+          end
+          if ENV['worker_army_basic_auth_password']
+            config['basic_auth_password'] = ENV['worker_army_basic_auth_password']
+          end
         else
           begin
             # puts "Using config in your home directory"

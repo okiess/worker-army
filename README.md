@@ -31,6 +31,9 @@ If you can't provide or don't want to provide the config file at that location, 
      worker_army_client_retry_count
      worker_army_callback_retry_count
      worker_army_store_job_data
+     worker_army_use_basic_auth
+     worker_army_basic_auth_username
+     worker_army_basic_auth_password
 
 ## Server / Queue
 
