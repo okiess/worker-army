@@ -48,6 +48,9 @@ else
 end
 
 post '/jobs' do
+  unless request.env['HTTP_API_KEY'] == queue.config['api_key']
+    halt 401, "Not authorized\n"
+  end
   data = JSON.parse(request.body.read)
   queue_job = queue.push data if data
   json queue_job

@@ -32,6 +32,9 @@ module WorkerArmy
           if ENV['worker_army_basic_auth_password']
             config['basic_auth_password'] = ENV['worker_army_basic_auth_password']
           end
+          if ENV['worker_army_api_key']
+            config['api_key'] = ENV['worker_army_api_key']
+          end
         else
           begin
             # puts "Using config in your home directory"

@@ -5,6 +5,7 @@ redis_auth: "YOUR_PASS"
 client_retry_count: 10
 worker_retry_count: 10
 callback_retry_count: 5
+api_key: "YOUR_TOKEN"
 store_job_data: true
 use_basic_auth: false
 basic_auth_username: "admin"
