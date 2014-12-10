@@ -3,8 +3,21 @@ module WorkerArmy
     class << self
       def config
         return $config if $config
-        if ENV['worker_army_redis_host'] and ENV['worker_army_redis_port']
-          config = { 'redis_host' => ENV['worker_army_redis_host'], 'redis_port' => ENV['worker_army_redis_port'] }
+        if File.exist?("#{ENV['HOME']}/.worker_army.yml")
+          # puts "Using config in your home directory"
+          config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
+        else
+          config = {}
+          if ENV['worker_army_endpoint'] # client use only
+            config['endpoint'] = ENV['worker_army_endpoint']
+          end
+          
+          if ENV['worker_army_redis_host']
+            config['redis_host'] = ENV['worker_army_redis_host']
+          end
+          if ENV['worker_army_redis_port']
+            config['redis_port'] = ENV['worker_army_redis_port']
+          end
           if ENV['worker_army_redis_auth']
             config['redis_auth'] = ENV['worker_army_redis_auth']
           end
@@ -17,9 +30,7 @@ module WorkerArmy
           if ENV['worker_army_callback_retry_count']
             config['callback_retry_count'] = ENV['worker_army_callback_retry_count'].to_i
           end
-          if ENV['worker_army_endpoint']
-            config['endpoint'] = ENV['worker_army_endpoint']
-          end
+          
           if ENV['worker_army_store_job_data']
             config['store_job_data'] = (ENV['worker_army_store_job_data'] == 'true')
           end
@@ -35,13 +46,9 @@ module WorkerArmy
           if ENV['worker_army_api_key']
             config['api_key'] = ENV['worker_army_api_key']
           end
-        else
-          begin
-            # puts "Using config in your home directory"
-            config = YAML.load(File.read("#{ENV['HOME']}/.worker_army.yml"))
-          rescue Errno::ENOENT
-            raise "worker-army configuration expected in ~/.worker_army.yml or provide env vars..."
-          end
+        end
+        if config.keys.size == 0
+          raise "worker-army configuration expected in ~/.worker_army.yml or provide env vars..."
         end
         $config = config
       end
