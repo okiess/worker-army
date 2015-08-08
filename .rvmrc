@@ -1,1 +1,1 @@
-rvm use ruby-2.1.2@worker-army --create
+rvm use ruby-2.2.1@worker-army --create
