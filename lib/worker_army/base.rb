@@ -11,7 +11,11 @@ module WorkerArmy
           if ENV['worker_army_endpoint'] # client use only
             config['endpoint'] = ENV['worker_army_endpoint']
           end
+          if ENV['worker_army_api_key']
+            config['api_key'] = ENV['worker_army_api_key']
+          end
           
+          # server / worker env vars
           if ENV['worker_army_redis_host']
             config['redis_host'] = ENV['worker_army_redis_host']
           end
@@ -42,9 +46,6 @@ module WorkerArmy
           end
           if ENV['worker_army_basic_auth_password']
             config['basic_auth_password'] = ENV['worker_army_basic_auth_password']
-          end
-          if ENV['worker_army_api_key']
-            config['api_key'] = ENV['worker_army_api_key']
           end
         end
         if config.keys.size == 0
