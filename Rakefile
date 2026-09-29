@@ -11,18 +11,6 @@ rescue Bundler::BundlerError => e
 end
 require 'rake'
 
-require 'jeweler'
-Jeweler::Tasks.new do |gem|
-  gem.name = "worker-army"
-  gem.homepage = "http://github.com/okiess/worker-army"
-  gem.license = "MIT"
-  gem.summary = %Q{Simple worker queue}
-  gem.description = %Q{Simple redis based worker queue with a HTTP/Rest interface}
-  gem.email = "kiessler@inceedo.com"
-  gem.authors = ["Oliver Kiessler"]
-end
-Jeweler::RubygemsDotOrgTasks.new
-
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
@@ -33,7 +21,7 @@ end
 task :default => :test
 
 require 'rdoc/task'
-Rake::RDocTask.new do |rdoc|
+RDoc::Task.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "worker-army #{version}"

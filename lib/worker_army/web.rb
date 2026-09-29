@@ -2,17 +2,15 @@ require "json"
 require "multi_json"
 require "sinatra"
 require "sinatra/json"
-require "sinatra/basic_auth"
 require File.dirname(__FILE__) + '/log'
 require File.dirname(__FILE__) + '/queue'
 
 queue = WorkerArmy::Queue.new
-auth = false
+
 if queue.config['use_basic_auth'] and queue.config['basic_auth_username'] and queue.config['basic_auth_password']
-  authorize do |username, password|
+  use Rack::Auth::Basic, "worker-army" do |username, password|
     username == queue.config['basic_auth_username'] && password == queue.config['basic_auth_password']
   end
-  auth = true
 end
 
 before do
@@ -35,16 +33,8 @@ def overview(queue)
   }
 end
 
-if auth
-  protect do
-    get "/" do
-      json overview(queue)
-    end
-  end
-else
-  get '/' do
-    json overview(queue)
-  end
+get '/' do
+  json overview(queue)
 end
 
 post '/jobs' do

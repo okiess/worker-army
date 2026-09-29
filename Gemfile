@@ -1,17 +1,17 @@
 source 'https://rubygems.org'
-ruby '2.2.1'
 
 gem "redis"
 gem "multi_json"
-gem "sinatra"
+gem "sinatra", ">= 2.2.0"
 gem "sinatra-contrib"
-gem "sinatra-basic-auth"
-gem "rest-client"
-gem "rake"
+gem "rest-client", ">= 1.7.3"
+gem "rake", ">= 12.3.3"
 gem 'unicorn'
 gem "foreman"
-gem "jeweler", "~> 2.0.1"
 
 group :development do
-  gem "bundler", "~> 1.6.2"
+  gem "shoulda", ">= 0"
+  gem "bundler", ">= 2.2.33"
+  gem "git", ">= 1.11.0"
+  gem "test-unit", "~> 3.7"
 end
